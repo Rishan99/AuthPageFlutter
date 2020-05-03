@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:authpage/clipper/clipper.dart';
 import 'package:flutter/material.dart';
 
@@ -313,7 +312,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         ),
         Expanded(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -414,10 +413,11 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     child: Container(
                         width: double.maxFinite,
                         child: RaisedButton(
+                          color:  Colors.white,
                             child: Text(
                               'SignUp',
                               style:
-                                  TextStyle(color: Colors.white, fontSize: 17),
+                                  TextStyle(color: Colors.black, fontSize: 17),
                             ),
                             onPressed: () {})),
                   ),
@@ -437,7 +437,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         Expanded(
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: 10,
+              horizontal: 15,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
