@@ -3,24 +3,48 @@ import 'package:authpage/clipper/clipper.dart';
 import 'package:flutter/material.dart';
 
 class AuthPage extends StatefulWidget {
+  ///Top Widget typically logo oo Application Name, If nothing to be displayed pass Container() as a value
+  final Widget title;
   final String usernameHintText;
   final String passwordHintText;
-  final String submitButtonText;
   final String confirmPasswordHintText;
-  final String title;
-  final TextStyle titleTextStyle;
-  final Function(String, String) signUpButton;
+  final String loginButtonText;
+  final String signUpButtonText;
+
+  ///Action to be performed when forgot password is pressed
+  final Function onForgotPassword;
+
+  ///Action to be performed when login button is pressed
+  final Function onLoginButton;
+
+  ///Action to be performed when sign up button is pressed
+  final Function onSignUpButton;
+
+  ///Action to be performed when Google sign in button is pressed, if null the icon is hidden
+  final Function onGoogleSignIn;
+
+  ///Action to be performed when Facebook sign in button is pressed, if null the icon is hidden
+  final Function onFbSignIn;
+
+  ///Action to be performed when Twitter sign in button is pressed, if null the icon is hidden
+  final Function ontwitterSignIn;
 
   const AuthPage({
     Key key,
     this.usernameHintText,
     this.passwordHintText,
-    this.submitButtonText,
+    this.loginButtonText,
+    this.signUpButtonText,
     this.confirmPasswordHintText,
-    this.titleTextStyle,
-    this.signUpButton,
     this.title,
-  }) : super(key: key);
+    this.onGoogleSignIn,
+    this.onFbSignIn,
+    this.ontwitterSignIn,
+    this.onForgotPassword,
+    @required this.onLoginButton,
+    @required this.onSignUpButton,
+  })  : assert(onSignUpButton != null && onLoginButton != null),
+        super(key: key);
   @override
   _AuthPageState createState() => _AuthPageState();
 }
@@ -50,8 +74,6 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
       ..addListener(() {
         setState(() {});
       });
-
-    ;
   }
 
   @override
@@ -76,142 +98,181 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
             child: Container(
               height: height * 100,
               width: width * 100,
-              child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Stack(
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: ClipPath(
-                            clipper: UpperDiagonalClip(),
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xff333399),
-                                    Color(0xffff00cc)
-                                  ],
-                                  begin: Alignment.topRight,
-                                  end: Alignment.bottomLeft,
-                                )),
-                                height: height * 70,
-                                width: width * 80,
-                                child: loginPage(height * 70, width * 80))),
-                      ),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: ClipPath(
-                            clipper: LowerDiagonalClipPart(),
-                            child: Container(
-                                color: Color(0xfff48817),
-                                height: height * 70,
-                                width: width * 80,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: height * 30,
+                    width: width * 100,
+                    child: widget.title ??
+                        Center(
+                          child: CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.red,
+                            child: Text('App Title'),
+                          ),
+                        ),
+                  ),
+                  Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Stack(
+                        children: <Widget>[
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: ClipPath(
+                                clipper: UpperDiagonalClip(),
                                 child: Container(
-                                  padding: EdgeInsets.only(
-                                      bottom: height * 70 / 16,
-                                      left: width / 2.3),
-                                  child: Align(
-                                    alignment: Alignment.bottomLeft,
-                                    child: InkWell(
-                                      child: Container(
-                                        padding: EdgeInsets.all(5),
-                                        child: Transform.rotate(
-                                          angle: _animation1.value,
-                                          child: Icon(
-                                            Icons.arrow_downward,
-                                            color: Colors.white,
+                                    decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xff333399),
+                                        Color(0xffff00cc)
+                                      ],
+                                      begin: Alignment.topRight,
+                                      end: Alignment.bottomLeft,
+                                    )),
+                                    height: height * 70,
+                                    width: width * 80,
+                                    child: loginPage(height * 70, width * 80))),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: ClipPath(
+                                clipper: LowerDiagonalClipPart(),
+                                child: Container(
+                                    color: Color(0xfff48817),
+                                    height: height * 70,
+                                    width: width * 80,
+                                    child: Container(
+                                      padding: EdgeInsets.only(
+                                          bottom: height * 70 / 16,
+                                          left: width * 1.3),
+                                      child: Align(
+                                        alignment: Alignment.bottomLeft,
+                                        child: InkWell(
+                                          child: Container(
+                                            padding: EdgeInsets.all(5),
+                                            child: Transform.rotate(
+                                              angle: _animation1.value,
+                                              child: Icon(
+                                                Icons.arrow_downward,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.black),
                                           ),
+                                          onTap: () async {
+                                            _animationController1.forward();
+                                            _userNameController.clear();
+                                            _passwordController.clear();
+                                            _confirmPasswordController.clear();
+                                            _pageController.animateToPage(1,
+                                                duration: Duration(seconds: 1),
+                                                curve: Curves.ease);
+                                          },
                                         ),
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.blue),
                                       ),
-                                      onTap: () async {
-                                        _animationController1.forward();
-                                        _userNameController.clear();
-                                        _passwordController.clear();
-                                        _confirmPasswordController.clear();
-                                        _pageController.animateToPage(1,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.ease);
-                                      },
+                                    ))),
+                          ),
+                          (widget.onGoogleSignIn != null)
+                              ? Positioned(
+                                  bottom: (height * 70 - (height * 70) / 1.25) -
+                                      height * 0,
+                                  left: width * 70 -
+                                      (width * 70 / 1.39) -
+                                      width * 8.2,
+                                  child: InkWell(
+                                    onTap: widget.onGoogleSignIn,
+                                    child: Container(
+                                      decoration: BoxDecoration(boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.black,
+                                            offset: Offset(2, 0),
+                                            blurRadius: 0,
+                                            spreadRadius: 0.5)
+                                      ], shape: BoxShape.circle),
+                                      child: CircleAvatar(
+                                        radius: 25,
+                                        backgroundColor: Colors.white,
+                                        child: Image.asset(
+                                          "assets/google.png",
+                                          fit: BoxFit.cover,
+                                          height: 30,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ))),
-                      ),
-                      Positioned(
-                        bottom:
-                            (height * 70 - (height * 70) / 1.25) - height * 0,
-                        left: width * 70 - (width * 70 / 1.39) - width * 8.2,
-                        child: Container(
-                          decoration: BoxDecoration(boxShadow: [
-                            BoxShadow(
-                                color: Colors.black,
-                                offset: Offset(2, 0),
-                                blurRadius: 0,
-                                spreadRadius: 0.5)
-                          ], shape: BoxShape.circle),
-                          child: CircleAvatar(
-                            radius: 25,
-                            backgroundColor: Colors.white,
-                            child: Image.asset(
-                              "assets/google.png",
-                              fit: BoxFit.cover,
-                              height: 30,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: (height * 70 - (height * 70) / 1.25) - 42,
-                        left: width * 70 - (width * 70 / 1.4) + 10,
-                        child: Container(
-                          decoration: BoxDecoration(boxShadow: [
-                            BoxShadow(
-                                color: Colors.black,
-                                offset: Offset(2, 0),
-                                blurRadius: 0,
-                                spreadRadius: 0.5)
-                          ], shape: BoxShape.circle),
-                          child: CircleAvatar(
-                            radius: 25,
-                            backgroundColor: Colors.white,
-                            child: Image.asset(
-                              "assets/fb.png",
-                              fit: BoxFit.cover,
-                              height: 30,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: (height * 70 - (height * 70) / 1.25) -
-                            42 -
-                            42 +
-                            12 -
-                            12,
-                        left: width * 70 - (width * 70 / 1.5) + 5 + 25 + 12,
-                        child: Container(
-                          decoration: BoxDecoration(boxShadow: [
-                            BoxShadow(
-                                color: Colors.black,
-                                offset: Offset(2, 0),
-                                blurRadius: 0,
-                                spreadRadius: 0.5)
-                          ], shape: BoxShape.circle),
-                          child: CircleAvatar(
-                            radius: 25,
-                            backgroundColor: Colors.white,
-                            child: Image.asset(
-                              "assets/twitter.png",
-                              fit: BoxFit.cover,
-                              // height: 30,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )),
+                                )
+                              : Container(),
+                          (widget.onFbSignIn != null)
+                              ? Positioned(
+                                  bottom:
+                                      (height * 70 - (height * 70) / 1.25) - 42,
+                                  left: width * 70 - (width * 70 / 1.4) + 10,
+                                  child: InkWell(
+                                    onTap: widget.onFbSignIn,
+                                    child: Container(
+                                      decoration: BoxDecoration(boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.black,
+                                            offset: Offset(2, 0),
+                                            blurRadius: 0,
+                                            spreadRadius: 0.5)
+                                      ], shape: BoxShape.circle),
+                                      child: CircleAvatar(
+                                        radius: 25,
+                                        backgroundColor: Colors.white,
+                                        child: Image.asset(
+                                          "assets/fb.png",
+                                          fit: BoxFit.cover,
+                                          height: 30,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Container(),
+                          (widget.ontwitterSignIn != null)
+                              ? Positioned(
+                                  bottom: (height * 70 - (height * 70) / 1.25) -
+                                      42 -
+                                      42 +
+                                      12 -
+                                      12,
+                                  left: width * 70 -
+                                      (width * 70 / 1.5) +
+                                      5 +
+                                      25 +
+                                      12,
+                                  child: InkWell(
+                                    onTap: widget.ontwitterSignIn,
+                                    child: Container(
+                                      decoration: BoxDecoration(boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.black,
+                                            offset: Offset(2, 0),
+                                            blurRadius: 0,
+                                            spreadRadius: 0.5)
+                                      ], shape: BoxShape.circle),
+                                      child: CircleAvatar(
+                                        radius: 25,
+                                        backgroundColor: Colors.white,
+                                        child: Image.asset(
+                                          "assets/twitter.png",
+                                          fit: BoxFit.cover,
+                                          // height: 30,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Container(),
+                        ],
+                      )),
+                ],
+              ),
             ),
           ),
           SingleChildScrollView(
@@ -262,7 +323,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                 child: Container(
                                   padding: EdgeInsets.only(
                                       top: height * 70 / 16,
-                                      right: width / 2.3),
+                                      right: width * 1.3),
                                   height: ((height * 70) / 2),
                                   alignment: Alignment.topRight,
                                   child: InkWell(
@@ -273,11 +334,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                                         child: Icon(
                                           Icons.arrow_downward,
                                           color: Colors.white,
+                                          size: 20,
                                         ),
                                       ),
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: Colors.blue),
+                                          color: Colors.black),
                                     ),
                                     onTap: () async {
                                       _animationController1.reverse();
@@ -312,7 +374,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
         ),
         Expanded(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -413,13 +475,16 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                     child: Container(
                         width: double.maxFinite,
                         child: RaisedButton(
-                          color:  Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(35),
+                            ),
+                            color: Colors.white,
                             child: Text(
-                              'SignUp',
+                              widget.signUpButtonText ?? 'Sign Up',
                               style:
                                   TextStyle(color: Colors.black, fontSize: 17),
                             ),
-                            onPressed: () {})),
+                            onPressed: widget.onSignUpButton)),
                   ),
                 ),
               ],
@@ -500,17 +565,32 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                   ],
                 ),
                 Align(
+                    alignment: Alignment.topLeft,
+                    child: InkWell(
+                      onTap: widget.onForgotPassword,
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            decorationStyle: TextDecorationStyle.solid),
+                      ),
+                    )),
+                Align(
                   alignment: Alignment.center,
                   child: Container(
                     width: double.maxFinite,
                     child: RaisedButton(
                         splashColor: Color(0xffff00cc),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(35),
+                        ),
                         color: Color(0xfffc4a1a),
                         child: Text(
-                          'Login',
+                          widget.loginButtonText ?? 'Login',
                           style: TextStyle(color: Colors.white, fontSize: 17),
                         ),
-                        onPressed: () {}),
+                        onPressed: widget.onLoginButton),
                   ),
                 ),
               ],

@@ -63,10 +63,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
         resizeToAvoidBottomInset: true,
         body: AuthPage(
-          signUpButton: (one, two) {
-            print(one);
-            print(two);
-          },
+          
+          onSignUpButton: (){},
+          onLoginButton: (){},
         ));
   }
 }
