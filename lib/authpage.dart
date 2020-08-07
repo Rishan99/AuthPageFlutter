@@ -2,8 +2,13 @@ import 'dart:math';
 import 'package:authpage/clipper/clipper.dart';
 import 'package:flutter/material.dart';
 
+typedef OnLoginPressed = void Function(String username, String password);
+
+typedef OnSignUpPressed = void Function(
+    String username, String password, String confirmPassword);
+
 class AuthPage extends StatefulWidget {
-  ///Top Widget typically logo oo Application Name, If nothing to be displayed pass Container() as a value
+  ///Top Widget typically logo or Application Name, If nothing to be displayed pass Container() as a value
   final Widget title;
   final String usernameHintText;
   final String passwordHintText;
@@ -11,14 +16,23 @@ class AuthPage extends StatefulWidget {
   final String loginButtonText;
   final String signUpButtonText;
 
+  ///Custom BoxDecoration for third party logins [facebook, google, twitter], if null default box decoration is used
+  ///provide Circle Shape decoration for better shadow visualization
+  final BoxDecoration thirdPartyLoginDecoration;
+
   ///Action to be performed when forgot password is pressed
-  final Function onForgotPassword;
+  final Function(String emailId) onForgotPassword;
 
   ///Action to be performed when login button is pressed
-  final Function onLoginButton;
+  ///
+  ///[String username, String password]
+  final OnLoginPressed onLoginButton;
 
   ///Action to be performed when sign up button is pressed
-  final Function onSignUpButton;
+  ///
+  ///[String username, String confirmPassword ,String password]
+
+  final OnSignUpPressed onSignUpButton;
 
   ///Action to be performed when Google sign in button is pressed, if null the icon is hidden
   final Function onGoogleSignIn;
@@ -33,6 +47,7 @@ class AuthPage extends StatefulWidget {
     Key key,
     this.usernameHintText,
     this.passwordHintText,
+    this.thirdPartyLoginDecoration,
     this.loginButtonText,
     this.signUpButtonText,
     this.confirmPasswordHintText,
@@ -43,7 +58,9 @@ class AuthPage extends StatefulWidget {
     this.onForgotPassword,
     @required this.onLoginButton,
     @required this.onSignUpButton,
-  })  : assert(onSignUpButton != null && onLoginButton != null),
+  })  : assert(onSignUpButton != null &&
+            onLoginButton != null &&
+            onForgotPassword != null),
         super(key: key);
   @override
   _AuthPageState createState() => _AuthPageState();
@@ -61,305 +78,268 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   PageController _pageController = PageController();
   Animation<double> _animation1;
   AnimationController _animationController1;
-  TextStyle _textTextStyle = TextStyle(color: Colors.white);
+  TextStyle _textTextStyle =
+      TextStyle(color: Colors.white, decoration: TextDecoration.none);
   TextStyle _hintTextStyle = TextStyle(color: Colors.white70);
   Color _iconColor = Colors.white70;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _animationController1 = AnimationController(
         vsync: this, duration: Duration(milliseconds: 1200));
     _animation1 = Tween(begin: 0.0, end: pi).animate(_animationController1)
-      ..addListener(() {
-        setState(() {});
-      });
+      ..addListener(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    print(MediaQuery.of(context).padding.top);
     height = (MediaQuery.of(context).size.height -
-            MediaQuery.of(context).padding.bottom -
+            (MediaQuery.of(context).padding.bottom) -
             MediaQuery.of(context).padding.top) /
         100;
     width = (MediaQuery.of(context).size.width -
-            MediaQuery.of(context).padding.left -
+            (MediaQuery.of(context).padding.left) -
             MediaQuery.of(context).padding.right) /
         100;
-    return SafeArea(
-      child: PageView(
-        physics: NeverScrollableScrollPhysics(),
-        reverse: false,
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              height: height * 100,
-              width: width * 100,
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    height: height * 30,
-                    width: width * 100,
+    return PageView(
+      physics: NeverScrollableScrollPhysics(),
+      reverse: false,
+      controller: _pageController,
+      scrollDirection: Axis.vertical,
+      children: [
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
                     child: widget.title ??
                         Center(
                           child: CircleAvatar(
-                            radius: 80,
+                            radius: 50,
                             backgroundColor: Colors.red,
                             child: Text('App Title'),
                           ),
                         ),
                   ),
-                  Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Stack(
-                        children: <Widget>[
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: ClipPath(
-                                clipper: UpperDiagonalClip(),
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                      colors: [
-                                        Color(0xff333399),
-                                        Color(0xffff00cc)
-                                      ],
-                                      begin: Alignment.topRight,
-                                      end: Alignment.bottomLeft,
-                                    )),
-                                    height: height * 70,
-                                    width: width * 80,
-                                    child: loginPage(height * 70, width * 80))),
-                          ),
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: ClipPath(
-                                clipper: LowerDiagonalClipPart(),
-                                child: Container(
-                                    color: Color(0xfff48817),
-                                    height: height * 70,
-                                    width: width * 80,
-                                    child: Container(
-                                      padding: EdgeInsets.only(
-                                          bottom: height * 70 / 16,
-                                          left: width * 1.3),
-                                      child: Align(
-                                        alignment: Alignment.bottomLeft,
-                                        child: InkWell(
-                                          child: Container(
-                                            padding: EdgeInsets.all(5),
-                                            child: Transform.rotate(
-                                              angle: _animation1.value,
-                                              child: Icon(
-                                                Icons.arrow_downward,
-                                                color: Colors.white,
-                                                size: 20,
-                                              ),
-                                            ),
-                                            decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.black),
-                                          ),
-                                          onTap: () async {
-                                            _animationController1.forward();
-                                            _userNameController.clear();
-                                            _passwordController.clear();
-                                            _confirmPasswordController.clear();
-                                            _pageController.animateToPage(1,
-                                                duration: Duration(seconds: 1),
-                                                curve: Curves.ease);
-                                          },
-                                        ),
-                                      ),
-                                    ))),
-                          ),
-                          (widget.onGoogleSignIn != null)
-                              ? Positioned(
-                                  bottom: (height * 70 - (height * 70) / 1.25) -
-                                      height * 0,
-                                  left: width * 70 -
-                                      (width * 70 / 1.39) -
-                                      width * 8.2,
-                                  child: InkWell(
-                                    onTap: widget.onGoogleSignIn,
-                                    child: Container(
-                                      decoration: BoxDecoration(boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black,
-                                            offset: Offset(2, 0),
-                                            blurRadius: 0,
-                                            spreadRadius: 0.5)
-                                      ], shape: BoxShape.circle),
-                                      child: CircleAvatar(
-                                        radius: 25,
-                                        backgroundColor: Colors.white,
-                                        child: Image.asset(
-                                          "assets/google.png",
-                                          fit: BoxFit.cover,
-                                          height: 30,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Container(),
-                          (widget.onFbSignIn != null)
-                              ? Positioned(
-                                  bottom:
-                                      (height * 70 - (height * 70) / 1.25) - 42,
-                                  left: width * 70 - (width * 70 / 1.4) + 10,
-                                  child: InkWell(
-                                    onTap: widget.onFbSignIn,
-                                    child: Container(
-                                      decoration: BoxDecoration(boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black,
-                                            offset: Offset(2, 0),
-                                            blurRadius: 0,
-                                            spreadRadius: 0.5)
-                                      ], shape: BoxShape.circle),
-                                      child: CircleAvatar(
-                                        radius: 25,
-                                        backgroundColor: Colors.white,
-                                        child: Image.asset(
-                                          "assets/fb.png",
-                                          fit: BoxFit.cover,
-                                          height: 30,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Container(),
-                          (widget.ontwitterSignIn != null)
-                              ? Positioned(
-                                  bottom: (height * 70 - (height * 70) / 1.25) -
-                                      42 -
-                                      42 +
-                                      12 -
-                                      12,
-                                  left: width * 70 -
-                                      (width * 70 / 1.5) +
-                                      5 +
-                                      25 +
-                                      12,
-                                  child: InkWell(
-                                    onTap: widget.ontwitterSignIn,
-                                    child: Container(
-                                      decoration: BoxDecoration(boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black,
-                                            offset: Offset(2, 0),
-                                            blurRadius: 0,
-                                            spreadRadius: 0.5)
-                                      ], shape: BoxShape.circle),
-                                      child: CircleAvatar(
-                                        radius: 25,
-                                        backgroundColor: Colors.white,
-                                        child: Image.asset(
-                                          "assets/twitter.png",
-                                          fit: BoxFit.cover,
-                                          // height: 30,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Container(),
-                        ],
-                      )),
-                ],
-              ),
-            ),
-          ),
-          SingleChildScrollView(
-            child: Container(
-              height: height * 100,
-              width: width * 100,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Stack(
+                ),
+                Stack(
                   children: <Widget>[
                     Align(
-                      alignment: Alignment.topCenter,
+                      alignment: Alignment.bottomCenter,
                       child: ClipPath(
-                        clipper: LowerDiagonalClip(),
-                        child: Container(
-                          decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                            colors: [
-                              Color(0xfff5af19),
-                              Color(0xfff12711),
-                            ],
-                            begin: Alignment.topRight,
-                            end: Alignment.bottomLeft,
-                          )),
-                          height: height * 70,
-                          width: width * 80,
-                          child: signUp(
-                            height * 70,
-                            width * 80,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child: ClipPath(
-                          clipper: UpperDiagonalClipPart(),
+                          clipper: UpperDiagonalClip(),
                           child: Container(
                               decoration: BoxDecoration(
-                                color: Color(0xffc50ebd),
-                              ),
+                                  gradient: LinearGradient(
+                                colors: [Color(0xff333399), Color(0xffff00cc)],
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                              )),
+                              height: height * 70,
+                              width: width * 80,
+                              child: loginPage(height * 70, width * 80))),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: ClipPath(
+                          clipper: LowerDiagonalClipPart(),
+                          child: Container(
+                              color: Color(0xfff48817),
                               height: height * 70,
                               width: width * 80,
                               child: Container(
-                                height: height * 70,
-                                width: width * 80,
-                                alignment: Alignment.topRight,
-                                child: Container(
-                                  padding: EdgeInsets.only(
-                                      top: height * 70 / 16,
-                                      right: width * 1.3),
-                                  height: ((height * 70) / 2),
-                                  alignment: Alignment.topRight,
+                                padding: EdgeInsets.only(
+                                    bottom: height * 70 / 16,
+                                    left: width * 1.3),
+                                child: Align(
+                                  alignment: Alignment.bottomLeft,
                                   child: InkWell(
                                     child: Container(
                                       padding: EdgeInsets.all(5),
-                                      child: Transform.rotate(
-                                        angle: _animation1.value,
-                                        child: Icon(
-                                          Icons.arrow_downward,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
+                                      child: AnimatedBuilder(
+                                        animation: _animation1,
+                                        builder: (context, child) {
+                                          return Transform.rotate(
+                                            angle: _animation1.value,
+                                            child: Icon(
+                                              Icons.arrow_downward,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          );
+                                        },
                                       ),
                                       decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: Colors.black),
                                     ),
                                     onTap: () async {
-                                      _animationController1.reverse();
+                                      //arrow animation
+                                      _animationController1.forward();
+
+                                      //clear textfields
                                       _userNameController.clear();
                                       _passwordController.clear();
                                       _confirmPasswordController.clear();
-                                      _pageController.animateToPage(0,
+                                      //animate to next page
+                                      _pageController.animateToPage(1,
                                           duration: Duration(seconds: 1),
                                           curve: Curves.ease);
                                     },
                                   ),
                                 ),
                               ))),
-                    )
+                    ),
+                    (widget.onGoogleSignIn != null)
+                        ? Positioned(
+                            bottom: (height * 70 - (height * 70) / 1.25) -
+                                height * 0,
+                            left:
+                                width * 70 - (width * 70 / 1.39) - width * 8.2,
+                            child: circularLoginWidget(
+                                "assets/google.png", widget.onGoogleSignIn),
+                          )
+                        : Container(),
+                    (widget.onFbSignIn != null)
+                        ? Positioned(
+                            bottom: (height * 70 - (height * 70) / 1.25) - 42,
+                            left: width * 70 - (width * 70 / 1.4) + 10,
+                            child: circularLoginWidget(
+                                "assets/fb.png", widget.onFbSignIn),
+                          )
+                        : Container(),
+                    (widget.ontwitterSignIn != null)
+                        ? Positioned(
+                            bottom: (height * 70 - (height * 70) / 1.25) -
+                                42 -
+                                42 +
+                                12 -
+                                12,
+                            left: width * 70 - (width * 70 / 1.5) + 5 + 25 + 12,
+                            child: circularLoginWidget(
+                                "assets/twitter.png", widget.ontwitterSignIn),
+                          )
+                        : Container(),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
-        ],
+        ),
+        Container(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Stack(
+              children: <Widget>[
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ClipPath(
+                    clipper: LowerDiagonalClip(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                        colors: [
+                          Color(0xfff5af19),
+                          Color(0xfff12711),
+                        ],
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                      )),
+                      height: height * 70,
+                      width: width * 80,
+                      child: signUp(
+                        height * 70,
+                        width * 80,
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ClipPath(
+                      clipper: UpperDiagonalClipPart(),
+                      child: Container(
+                          decoration: BoxDecoration(
+                            color: Color(0xffc50ebd),
+                          ),
+                          height: height * 70,
+                          width: width * 80,
+                          child: Container(
+                            height: height * 70,
+                            width: width * 80,
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              padding: EdgeInsets.only(
+                                  top: height * 70 / 16, right: width * 1.3),
+                              height: ((height * 70) / 2),
+                              alignment: Alignment.topRight,
+                              child: InkWell(
+                                child: Container(
+                                  padding: EdgeInsets.all(5),
+                                  child: AnimatedBuilder(
+                                    animation: _animation1,
+                                    builder: (context, child) {
+                                      return Transform.rotate(
+                                        angle: _animation1.value,
+                                        child: Icon(
+                                          Icons.arrow_downward,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.black),
+                                ),
+                                onTap: () async {
+                                  _animationController1.reverse();
+                                  _userNameController.clear();
+                                  _passwordController.clear();
+                                  _confirmPasswordController.clear();
+                                  _pageController.animateToPage(0,
+                                      duration: Duration(seconds: 1),
+                                      curve: Curves.ease);
+                                },
+                              ),
+                            ),
+                          ))),
+                )
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget circularLoginWidget(String logoPath, Function onTap) {
+    return Container(
+      decoration: widget.thirdPartyLoginDecoration ??
+          BoxDecoration(
+              color: Colors.transparent,
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black,
+                    offset: Offset(2, 0),
+                    blurRadius: 0,
+                    spreadRadius: 0.5)
+              ],
+              shape: BoxShape.circle),
+      child: CircleAvatar(
+        radius: 25,
+        backgroundColor: Colors.white,
+        child: InkWell(
+          onTap: onTap,
+          child: Image.asset(
+            logoPath,
+            fit: BoxFit.cover,
+            height: 30,
+          ),
+        ),
       ),
     );
   }
@@ -409,7 +389,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                       controller: _passwordController,
                       autofocus: false,
                       cursorColor: Colors.white,
-                      style: TextStyle(color: Colors.white),
+                      style: _textTextStyle,
                       decoration: InputDecoration(
                           border: InputBorder.none,
                           focusColor: Colors.black,
@@ -484,7 +464,12 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                               style:
                                   TextStyle(color: Colors.black, fontSize: 17),
                             ),
-                            onPressed: widget.onSignUpButton)),
+                            onPressed: () {
+                              widget.onSignUpButton(
+                                  _userNameController.text,
+                                  _passwordController.text,
+                                  _confirmPasswordController.text);
+                            })),
                   ),
                 ),
               ],
@@ -565,18 +550,6 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                   ],
                 ),
                 Align(
-                    alignment: Alignment.topLeft,
-                    child: InkWell(
-                      onTap: widget.onForgotPassword,
-                      child: Text(
-                        'Forgot Password?',
-                        style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                            decorationStyle: TextDecorationStyle.solid),
-                      ),
-                    )),
-                Align(
                   alignment: Alignment.center,
                   child: Container(
                     width: double.maxFinite,
@@ -590,9 +563,29 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                           widget.loginButtonText ?? 'Login',
                           style: TextStyle(color: Colors.white, fontSize: 17),
                         ),
-                        onPressed: widget.onLoginButton),
+                        onPressed: () {
+                          widget.onLoginButton(
+                            _userNameController.text,
+                            _passwordController.text,
+                          );
+                        }),
                   ),
                 ),
+                Align(
+                    alignment: Alignment.center,
+                    child: InkWell(
+                      onTap: () {
+                        widget.onForgotPassword(_userNameController.text);
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            color: Colors.white70,
+                            fontSize: 12,
+                            decorationStyle: TextDecorationStyle.solid),
+                      ),
+                    )),
               ],
             ),
           ),
